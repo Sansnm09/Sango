@@ -1,97 +1,37 @@
-const clientId = "YOUR_CLIENT_ID"
-const redirectUri = window.location.origin
-
-let accessToken=""
-let queue=[]
-
-function loginSpotify(){
-
-const authUrl =
-"https://accounts.spotify.com/authorize"+
-"?response_type=token"+
-"&client_id="+clientId+
-"&scope=user-read-private"+
-"&redirect_uri="+redirectUri
-
-window.location=authUrl
+body{
+background:#121212;
+color:white;
+font-family:Arial;
+text-align:center;
 }
 
-function getToken(){
-
-const hash=window.location.hash
-
-if(hash){
-
-const params=new URLSearchParams(hash.replace("#",""))
-accessToken=params.get("access_token")
-
+.search-box{
+margin:20px;
 }
 
+input{
+padding:10px;
+width:250px;
 }
 
-async function searchSongs(){
-
-if(!accessToken){
-
-alert("Login with Spotify first")
-return
+button{
+padding:10px;
+background:#1db954;
+border:none;
+color:white;
+cursor:pointer;
+margin:5px;
 }
 
-const query=document.getElementById("searchInput").value
-
-const result=await fetch(
-`https://api.spotify.com/v1/search?q=${query}&type=track&limit=5`,
-{
-headers:{
-Authorization:`Bearer ${accessToken}`
-}
-}
-)
-
-const data=await result.json()
-
-let html=""
-
-data.tracks.items.forEach(track=>{
-
-html+=`
-<div class="track">
-
-<p>${track.name} - ${track.artists[0].name}</p>
-
-<button onclick="playSong('${track.id}')">Play</button>
-
-<button onclick="addQueue('${track.id}','${track.name}')">Queue</button>
-
-</div>
-`
-
-})
-
-document.getElementById("results").innerHTML=html
+.track{
+background:#1e1e1e;
+margin:15px auto;
+padding:15px;
+width:350px;
+border-radius:10px;
 }
 
-function playSong(id){
-
-document.getElementById("player").innerHTML=
-`<iframe src="https://open.spotify.com/embed/track/${id}" width="320" height="80"></iframe>`
+img{
+width:100px;
+border-radius:5px;
 }
-
-function addQueue(id,name){
-
-queue.push({id,name})
-updateQueue()
-}
-
-function updateQueue(){
-
-let html=""
-
-queue.forEach(song=>{
-html+=`<li>${song.name}</li>`
-})
-
-document.getElementById("queue").innerHTML=html
-}
-
-getToken()
