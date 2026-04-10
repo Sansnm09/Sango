@@ -9,9 +9,10 @@
 <body>
 
 <header>
+
 <h1>Sango Music</h1>
 
-<input type="text" id="searchInput" placeholder="Search songs or artists">
+<input id="searchInput" placeholder="Search songs or artists">
 <button onclick="searchMusic()">Search</button>
 
 </header>
@@ -22,26 +23,52 @@
 
 </main>
 
+<!-- Queue Button -->
+
+<div class="queue-circle" onclick="toggleQueue()">🎵</div>
+
+<!-- Queue Panel -->
+
+<div id="queuePanel" class="queue-panel">
+
+<h3>Queue</h3>
+
+<ul id="queueList"></ul>
+
+<button onclick="clearQueue()">Clear</button>
+
+</div>
+
+<!-- Bottom Player -->
+
 <footer>
 
-<div class="player">
+<img id="cover">
 
-<img id="cover" src="" />
+<div class="track-info">
 
-<div class="info">
 <div id="title">No song</div>
-<div id="artist">Select music</div>
+<div id="artist"></div>
+
 </div>
 
 <div class="controls">
+
 <button onclick="previousSong()">⏮</button>
 <button onclick="togglePlay()" id="playBtn">▶</button>
 <button onclick="nextSong()">⏭</button>
-</div>
 
 </div>
 
-<input type="range" id="progress" value="0">
+<div class="time">
+
+<span id="currentTime">0:00</span>
+
+<input type="range" id="progress">
+
+<span id="duration">0:00</span>
+
+</div>
 
 </footer>
 
