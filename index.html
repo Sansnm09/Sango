@@ -1,42 +1,113 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 <meta charset="UTF-8">
 <title>Sazgo Music</title>
-<link rel="stylesheet" href="style.css">
+
+<style>
+
+body{
+background:#121212;
+color:white;
+font-family:Arial;
+text-align:center;
+}
+
+.song{
+background:#1e1e1e;
+padding:10px;
+margin:10px auto;
+width:400px;
+border-radius:8px;
+}
+
+button{
+padding:8px;
+margin:5px;
+background:#1db954;
+border:none;
+color:white;
+cursor:pointer;
+}
+
+#player{
+position:absolute;
+left:-9999px;   /* hidden player */
+}
+
+</style>
 </head>
 
 <body>
 
 <h1>Sazgo Music</h1>
 
-<div class="search">
-<input id="searchInput" placeholder="Search songs">
+<input id="searchInput" placeholder="Search song">
 <button onclick="searchSongs()">Search</button>
-</div>
 
-<h2>Results</h2>
 <div id="results"></div>
 
-<h2>Now Playing</h2>
 <div id="player"></div>
 
-<h2>Queue</h2>
+<script>
 
-<div class="queue-controls">
-<button onclick="playQueue()">Play All</button>
-<button onclick="clearQueue()">Clear Queue</button>
+let queue=[]
+let currentIndex=-1
+
+async function searchSongs(){
+
+const query=document.getElementById("searchInput").value
+
+const res=await fetch(`https://ytsearcher.vercel.app/api/search?q=${encodeURIComponent(query)}`)
+
+const data=await res.json()
+
+let html=""
+
+data.videos.slice(0,6).forEach(video=>{
+
+html+=`
+
+<div class="song">
+
+${video.title}
+
+<button onclick="playSong('${video.id}')">Play</button>
+
+<button onclick="addQueue('${video.id}','${video.title}')">
+Queue
+</button>
+
 </div>
 
-<ul id="queue"></ul>
+`
 
-<div class="controls">
-<button onclick="previousSong()">Previous</button>
-<button onclick="nextSong()">Next</button>
-</div>
+})
 
-<script src="script.js"></script>
+document.getElementById("results").innerHTML=html
+
+}
+
+function playSong(id){
+
+document.getElementById("player").innerHTML=
+
+`<iframe
+width="1"
+height="1"
+src="https://www.youtube.com/embed/${id}?autoplay=1"
+allow="autoplay">
+</iframe>`
+
+}
+
+function addQueue(id,name){
+
+queue.push({id,name})
+
+}
+
+</script>
 
 </body>
 </html>
