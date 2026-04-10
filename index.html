@@ -1,94 +1,49 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-
 <meta charset="UTF-8">
-
 <title>Sango Music</title>
-
 <link rel="stylesheet" href="style.css">
-
 </head>
-
 <body>
 
 <header>
-
-<h2>Sango</h2>
-
-<input id="searchInput" placeholder="Search songs or artists">
-
+  <h2>Sango</h2>
+  <input id="searchInput" placeholder="Search songs or artists" />
 </header>
 
 <main>
-
-<div id="results"></div>
-
+  <div id="results"></div>
 </main>
 
-<!-- Queue button -->
-
-<div id="queueBtn">🎵</div>
-
-<!-- Queue panel -->
+<div id="queueBtn">&#9835;</div>
 
 <div id="queuePanel">
-
-<h3>Queue</h3>
-
-<ul id="queueList"></ul>
-
-<button id="clearQueue">Clear Queue</button>
-
+  <h3>Queue</h3>
+  <ul id="queueList"></ul>
+  <button id="clearQueue">Clear Queue</button>
 </div>
-
-<!-- Bottom player -->
 
 <footer>
-
-<img id="cover">
-
-<div>
-
-<div id="title">No Song</div>
-
-<div id="artist">Select music</div>
-
-</div>
-
-<div>
-
-<button id="prevBtn">⏮</button>
-
-<button id="playBtn">▶</button>
-
-<button id="nextBtn">⏭</button>
-
-</div>
-
-<div>
-
-<span id="timeCur">0:00</span>
-
-<div id="barBg">
-
-<div id="barFill"></div>
-
-</div>
-
-<span id="timeEnd">0:00</span>
-
-</div>
-
-<input type="range" id="volSlider" min="0" max="1" step="0.05" value="0.7">
-
+  <img id="cover" src="" alt="cover" />
+  <div class="track-meta">
+    <div id="title">No Song</div>
+    <div id="artist">Select music</div>
+  </div>
+  <div class="controls">
+    <button id="prevBtn">&#9198;</button>
+    <button id="playBtn" class="play-main">&#9654;</button>
+    <button id="nextBtn">&#9197;</button>
+  </div>
+  <div class="progress-area">
+    <span id="timeCur">0:00</span>
+    <div id="barBg"><div id="barFill"></div></div>
+    <span id="timeEnd">0:00</span>
+  </div>
+  <input type="range" id="volSlider" min="0" max="1" step="0.05" value="0.7" />
 </footer>
 
 <audio id="audio"></audio>
-
 <script src="script.js"></script>
-
 </body>
-
 </html>
