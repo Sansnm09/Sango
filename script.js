@@ -1,97 +1,93 @@
-const API_KEY="943a0bae34mshe1eab6d31155808p12538djsn6e90e57ffe12"
+const audio=document.getElementById("audio")
 
-let queue=[]
-let currentIndex=0
+let playlist=[]
+let index=0
 
-async function searchSongs(){
+async function searchMusic(){
 
-const query=document.getElementById("searchInput").value
+const q=document.getElementById("searchInput").value
 
-const url=`https://spotify23.p.rapidapi.com/search/?q=${query}&type=tracks&limit=6`
+const res=await fetch(`https://itunes.apple.com/search?term=${q}&media=music&limit=20`)
+const data=await res.json()
 
-const options={
-method:'GET',
-headers:{
-'X-RapidAPI-Key':API_KEY,
-'X-RapidAPI-Host':'spotify23.p.rapidapi.com'
-}
-}
-
-const response=await fetch(url,options)
-const data=await response.json()
-
-const tracks=data.tracks.items
+playlist=data.results
 
 let html=""
 
-tracks.forEach(item=>{
-
-const track=item.data
+playlist.forEach((track,i)=>{
 
 html+=`
-<div class="track">
+<div class="card" onclick="playTrack(${i})">
 
-<p>${track.name} - ${track.artists.items[0].profile.name}</p>
-
-<button onclick="playSong('${track.id}')">Play</button>
-
-<button onclick="addQueue('${track.id}','${track.name}')">
-Add to Queue
-</button>
+<img src="${track.artworkUrl100}">
+<p>${track.trackName}</p>
+<p>${track.artistName}</p>
 
 </div>
 `
+
 })
 
 document.getElementById("results").innerHTML=html
 }
 
-function playSong(id){
+function playTrack(i){
 
-document.getElementById("player").innerHTML=
-`<iframe src="https://open.spotify.com/embed/track/${id}" width="400" height="100"></iframe>`
+index=i
+
+const track=playlist[i]
+
+audio.src=track.previewUrl
+audio.play()
+
+document.getElementById("title").innerText=track.trackName
+document.getElementById("artist").innerText=track.artistName
+document.getElementById("cover").src=track.artworkUrl100
+
+document.getElementById("playBtn").innerText="⏸"
 }
 
-function addQueue(id,name){
+function togglePlay(){
 
-queue.push({id,name})
-
-updateQueue()
+if(audio.paused){
+audio.play()
+document.getElementById("playBtn").innerText="⏸"
+}
+else{
+audio.pause()
+document.getElementById("playBtn").innerText="▶"
 }
 
-function updateQueue(){
-
-let html=""
-
-queue.forEach((song,index)=>{
-html+=`<li>${song.name}</li>`
-})
-
-document.getElementById("queue").innerHTML=html
 }
 
 function nextSong(){
 
-if(queue.length===0) return
-
-currentIndex++
-
-if(currentIndex>=queue.length){
-currentIndex=0
+if(index<playlist.length-1){
+index++
+playTrack(index)
 }
 
-playSong(queue[currentIndex].id)
 }
 
 function previousSong(){
 
-if(queue.length===0) return
-
-currentIndex--
-
-if(currentIndex<0){
-currentIndex=queue.length-1
+if(index>0){
+index--
+playTrack(index)
 }
 
-playSong(queue[currentIndex].id)
+}
+
+audio.ontimeupdate=()=>{
+
+const progress=document.getElementById("progress")
+
+progress.value=(audio.currentTime/audio.duration)*100
+
+}
+
+document.getElementById("progress").oninput=(e)=>{
+
+audio.currentTime=(e.target.value/100)*audio.duration
+
 }
