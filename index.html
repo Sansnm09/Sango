@@ -1,49 +1,42 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 <meta charset="UTF-8">
-<title>Sango Music</title>
+<title>Sazgo Music</title>
 <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<header>
-  <h2>Sango</h2>
-  <input id="searchInput" placeholder="Search songs or artists" />
-</header>
+<h1>Sazgo Music</h1>
 
-<main>
-  <div id="results"></div>
-</main>
-
-<div id="queueBtn">&#9835;</div>
-
-<div id="queuePanel">
-  <h3>Queue</h3>
-  <ul id="queueList"></ul>
-  <button id="clearQueue">Clear Queue</button>
+<div class="search">
+<input id="searchInput" placeholder="Search songs">
+<button onclick="searchSongs()">Search</button>
 </div>
 
-<footer>
-  <img id="cover" src="" alt="cover" />
-  <div class="track-meta">
-    <div id="title">No Song</div>
-    <div id="artist">Select music</div>
-  </div>
-  <div class="controls">
-    <button id="prevBtn">&#9198;</button>
-    <button id="playBtn" class="play-main">&#9654;</button>
-    <button id="nextBtn">&#9197;</button>
-  </div>
-  <div class="progress-area">
-    <span id="timeCur">0:00</span>
-    <div id="barBg"><div id="barFill"></div></div>
-    <span id="timeEnd">0:00</span>
-  </div>
-  <input type="range" id="volSlider" min="0" max="1" step="0.05" value="0.7" />
-</footer>
+<h2>Results</h2>
+<div id="results"></div>
 
-<audio id="audio"></audio>
+<h2>Now Playing</h2>
+<div id="player"></div>
+
+<h2>Queue</h2>
+
+<div class="queue-controls">
+<button onclick="playQueue()">Play All</button>
+<button onclick="clearQueue()">Clear Queue</button>
+</div>
+
+<ul id="queue"></ul>
+
+<div class="controls">
+<button onclick="previousSong()">Previous</button>
+<button onclick="nextSong()">Next</button>
+</div>
+
 <script src="script.js"></script>
+
 </body>
 </html>
