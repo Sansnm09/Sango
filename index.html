@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 <meta charset="UTF-8">
 <title>Sango Music</title>
@@ -9,36 +8,44 @@
 
 <body>
 
+<header>
 <h1>Sango Music</h1>
 
-<div class="search">
-<input id="searchInput" placeholder="Search song">
-<button onclick="searchSongs()">Search</button>
+<input type="text" id="searchInput" placeholder="Search songs or artists">
+<button onclick="searchMusic()">Search</button>
+
+</header>
+
+<main>
+
+<div id="results" class="results"></div>
+
+</main>
+
+<footer>
+
+<div class="player">
+
+<img id="cover" src="" />
+
+<div class="info">
+<div id="title">No song</div>
+<div id="artist">Select music</div>
 </div>
-
-<div class="container">
-
-<div class="results">
-<h2>Results</h2>
-<div id="results"></div>
-</div>
-
-<div class="queue-panel">
-
-<h2>Queue</h2>
-<ul id="queue"></ul>
 
 <div class="controls">
-<button onclick="previousSong()">Previous</button>
-<button onclick="nextSong()">Next</button>
+<button onclick="previousSong()">⏮</button>
+<button onclick="togglePlay()" id="playBtn">▶</button>
+<button onclick="nextSong()">⏭</button>
 </div>
 
 </div>
 
-</div>
+<input type="range" id="progress" value="0">
 
-<h2>Now Playing</h2>
-<div id="player"></div>
+</footer>
+
+<audio id="audio"></audio>
 
 <script src="script.js"></script>
 
