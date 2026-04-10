@@ -1,93 +1,206 @@
-const audio=document.getElementById("audio")
+// audio player
+const audio = document.getElementById("audio")
 
-let playlist=[]
-let index=0
+const playBtn = document.getElementById("playBtn")
+const prevBtn = document.getElementById("prevBtn")
+const nextBtn = document.getElementById("nextBtn")
 
-async function searchMusic(){
+const barFill = document.getElementById("barFill")
+const barBg = document.getElementById("barBg")
 
-const q=document.getElementById("searchInput").value
+const timeCur = document.getElementById("timeCur")
+const timeEnd = document.getElementById("timeEnd")
 
-const res=await fetch(`https://itunes.apple.com/search?term=${q}&media=music&limit=20`)
-const data=await res.json()
+const searchInput = document.getElementById("searchInput")
+const resultsDiv = document.getElementById("results")
 
-playlist=data.results
+const cover = document.getElementById("cover")
+const title = document.getElementById("title")
+const artist = document.getElementById("artist")
 
-let html=""
+const queueBtn = document.getElementById("queueBtn")
+const queuePanel = document.getElementById("queuePanel")
+const queueList = document.getElementById("queueList")
 
-playlist.forEach((track,i)=>{
+let playlist = []
+let queue = []
+let index = -1
 
-html+=`
-<div class="card" onclick="playTrack(${i})">
+audio.volume = 0.7
 
-<img src="${track.artworkUrl100}">
-<p>${track.trackName}</p>
-<p>${track.artistName}</p>
+function format(sec){
+if(!sec || isNaN(sec)) return "0:00"
 
+const m = Math.floor(sec/60)
+const s = Math.floor(sec%60)
+
+return m + ":" + (s < 10 ? "0"+s : s)
+}
+
+// search songs
+async function search(q){
+
+const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music&limit=20`)
+const data = await res.json()
+
+playlist = data.results.filter(t => t.previewUrl)
+
+resultsDiv.innerHTML = ""
+
+playlist.forEach((t,i)=>{
+
+const row = document.createElement("div")
+row.className = "song"
+
+row.innerHTML = `
+<img src="${t.artworkUrl100}">
+
+<div>
+<div>${t.trackName}</div>
+<div style="font-size:12px;color:#777">${t.artistName}</div>
 </div>
+
+<button class="play">Play</button>
+<button class="add">+</button>
 `
+
+row.querySelector(".play").onclick = () => {
+index = i
+playTrack(playlist[i])
+}
+
+row.querySelector(".add").onclick = () => {
+queue.push(playlist[i])
+updateQueue()
+}
+
+resultsDiv.appendChild(row)
+
+})
+}
+
+// play track
+function playTrack(track){
+
+audio.pause()
+
+audio.src = track.previewUrl
+audio.load()
+
+audio.play()
+
+cover.src = track.artworkUrl100
+title.innerText = track.trackName
+artist.innerText = track.artistName
+
+playBtn.innerText = "⏸"
+
+}
+
+// play pause
+playBtn.onclick = () => {
+
+if(audio.paused){
+
+audio.play()
+playBtn.innerText = "⏸"
+
+}else{
+
+audio.pause()
+playBtn.innerText = "▶"
+
+}
+
+}
+
+// previous
+prevBtn.onclick = () => {
+
+if(index > 0){
+index--
+playTrack(playlist[index])
+}
+
+}
+
+// next
+nextBtn.onclick = () => {
+
+if(index < playlist.length-1){
+index++
+playTrack(playlist[index])
+}
+
+}
+
+// duration loaded
+audio.onloadedmetadata = () => {
+timeEnd.innerText = format(audio.duration)
+}
+
+// progress update
+audio.ontimeupdate = () => {
+
+timeCur.innerText = format(audio.currentTime)
+
+const percent = (audio.currentTime/audio.duration)*100
+barFill.style.width = percent + "%"
+
+}
+
+// progress seek
+barBg.onclick = (e) => {
+
+const rect = barBg.getBoundingClientRect()
+const pos = (e.clientX - rect.left)/rect.width
+
+audio.currentTime = pos * audio.duration
+
+}
+
+// volume
+document.getElementById("volSlider").oninput = e => {
+audio.volume = e.target.value
+}
+
+// queue update
+function updateQueue(){
+
+queueList.innerHTML = ""
+
+queue.forEach(song => {
+
+const li = document.createElement("li")
+li.innerText = song.trackName
+
+queueList.appendChild(li)
 
 })
 
-document.getElementById("results").innerHTML=html
 }
 
-function playTrack(i){
+// queue panel toggle
+queueBtn.onclick = () => {
 
-index=i
-
-const track=playlist[i]
-
-audio.src=track.previewUrl
-audio.play()
-
-document.getElementById("title").innerText=track.trackName
-document.getElementById("artist").innerText=track.artistName
-document.getElementById("cover").src=track.artworkUrl100
-
-document.getElementById("playBtn").innerText="⏸"
-}
-
-function togglePlay(){
-
-if(audio.paused){
-audio.play()
-document.getElementById("playBtn").innerText="⏸"
-}
-else{
-audio.pause()
-document.getElementById("playBtn").innerText="▶"
-}
+queuePanel.style.display =
+queuePanel.style.display === "block" ? "none" : "block"
 
 }
 
-function nextSong(){
+// clear queue
+document.getElementById("clearQueue").onclick = () => {
 
-if(index<playlist.length-1){
-index++
-playTrack(index)
-}
-
-}
-
-function previousSong(){
-
-if(index>0){
-index--
-playTrack(index)
-}
+queue = []
+updateQueue()
 
 }
 
-audio.ontimeupdate=()=>{
+// search enter key
+searchInput.addEventListener("keypress", e => {
 
-const progress=document.getElementById("progress")
-
-progress.value=(audio.currentTime/audio.duration)*100
-
+if(e.key === "Enter"){
+search(searchInput.value)
 }
 
-document.getElementById("progress").oninput=(e)=>{
-
-audio.currentTime=(e.target.value/100)*audio.duration
-
-}
+})
