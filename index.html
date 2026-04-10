@@ -1,283 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
+const audio = document.getElementById("audio")
 
-<head>
-<meta charset="UTF-8">
-<title>Sango Music</title>
+const playBtn = document.getElementById("playBtn")
+const prevBtn = document.getElementById("prevBtn")
+const nextBtn = document.getElementById("nextBtn")
 
-<style>
+const barFill = document.getElementById("barFill")
+const barBg = document.getElementById("barBg")
 
-:root{
---bg:#050505;
---accent:#3498db;
---card:#111;
---text:#fff;
---dim:#777;
-}
+const timeCur = document.getElementById("timeCur")
+const timeEnd = document.getElementById("timeEnd")
 
-body{
-margin:0;
-background:var(--bg);
-color:var(--text);
-font-family:Segoe UI, Arial;
-height:100vh;
-display:flex;
-flex-direction:column;
-overflow:hidden;
-}
+const searchInput = document.getElementById("searchInput")
+const resultsDiv = document.getElementById("results")
 
-header{
-height:70px;
-display:flex;
-align-items:center;
-padding:0 40px;
-gap:40px;
-border-bottom:1px solid #1e1e1e;
-}
-
-.search-wrap{
-flex:1;
-max-width:500px;
-}
-
-.search-wrap input{
-width:100%;
-background:#18181b;
-border:1px solid #27272a;
-padding:12px 20px;
-border-radius:30px;
-color:white;
-outline:none;
-}
-
-.main{
-flex:1;
-overflow-y:auto;
-padding:40px;
-}
-
-.results{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
-gap:25px;
-}
-
-.card{
-background:var(--card);
-padding:15px;
-border-radius:10px;
-cursor:pointer;
-transition:.2s;
-}
-
-.card:hover{
-transform:translateY(-4px);
-background:#18181b;
-}
-
-.card img{
-width:100%;
-aspect-ratio:1/1;
-border-radius:8px;
-margin-bottom:10px;
-}
-
-.title{
-font-size:14px;
-font-weight:700;
-white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis;
-}
-
-.artist{
-font-size:12px;
-color:var(--dim);
-}
-
-footer{
-height:110px;
-background:#09090b;
-border-top:1px solid #1e1e1e;
-display:flex;
-align-items:center;
-padding:0 40px;
-gap:40px;
-}
-
-.track-info{
-display:flex;
-align-items:center;
-gap:15px;
-width:280px;
-}
-
-.track-info img{
-width:55px;
-height:55px;
-border-radius:6px;
-object-fit:cover;
-}
-
-.controls{
-flex:1;
-display:flex;
-flex-direction:column;
-align-items:center;
-gap:10px;
-}
-
-.btn-row{
-display:flex;
-gap:25px;
-align-items:center;
-}
-
-.play-btn{
-width:45px;
-height:45px;
-background:white;
-border-radius:50%;
-border:none;
-font-size:20px;
-cursor:pointer;
-}
-
-.progress-row{
-width:100%;
-max-width:600px;
-display:flex;
-align-items:center;
-gap:10px;
-}
-
-.time{
-font-size:11px;
-color:var(--dim);
-min-width:35px;
-font-family:monospace;
-}
-
-.bar-bg{
-flex:1;
-height:4px;
-background:#27272a;
-border-radius:2px;
-cursor:pointer;
-}
-
-.bar-fill{
-height:100%;
-background:var(--accent);
-width:0%;
-}
-
-.vol{
-width:150px;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<header>
-
-<h2>Sango</h2>
-
-<div class="search-wrap">
-<input id="searchInput" placeholder="Search songs or artists">
-</div>
-
-</header>
-
-<main class="main">
-
-<div class="results" id="results"></div>
-
-</main>
-
-<footer>
-
-<div class="track-info">
-
-<img id="cover">
-
-<div>
-
-<div id="title">No Song</div>
-<div id="artist" style="color:var(--accent);font-size:12px;">Select music</div>
-
-</div>
-
-</div>
-
-<div class="controls">
-
-<div class="btn-row">
-
-<span id="prevBtn" style="cursor:pointer;font-size:20px;">⏮</span>
-
-<button class="play-btn" id="playBtn">▶</button>
-
-<span id="nextBtn" style="cursor:pointer;font-size:20px;">⏭</span>
-
-</div>
-
-<div class="progress-row">
-
-<span class="time" id="timeCur">0:00</span>
-
-<div class="bar-bg" id="barBg">
-
-<div class="bar-fill" id="barFill"></div>
-
-</div>
-
-<span class="time" id="timeEnd">0:00</span>
-
-</div>
-
-</div>
-
-<div class="vol">
-
-<input type="range" id="volSlider" min="0" max="1" step="0.05" value="0.7">
-
-</div>
-
-</footer>
-
-<audio id="audio"></audio>
-
-<script>
-
-const audio=document.getElementById("audio")
-
-const playBtn=document.getElementById("playBtn")
-const prevBtn=document.getElementById("prevBtn")
-const nextBtn=document.getElementById("nextBtn")
-
-const barFill=document.getElementById("barFill")
-const barBg=document.getElementById("barBg")
-
-const timeCur=document.getElementById("timeCur")
-const timeEnd=document.getElementById("timeEnd")
-
-const searchInput=document.getElementById("searchInput")
-const resultsDiv=document.getElementById("results")
-
-const cover=document.getElementById("cover")
-const title=document.getElementById("title")
-const artist=document.getElementById("artist")
+const cover = document.getElementById("cover")
+const title = document.getElementById("title")
+const artist = document.getElementById("artist")
 
 let playlist=[]
 let index=-1
 
 function format(sec){
 
-if(!sec||isNaN(sec))return"0:00"
+if(!sec||isNaN(sec)) return "0:00"
 
 const m=Math.floor(sec/60)
 const s=Math.floor(sec%60)
@@ -288,13 +33,42 @@ return m+":"+(s<10?"0"+s:s)
 
 async function search(q){
 
-if(!q)return
+if(!q) return
+
+resultsDiv.innerHTML="Searching..."
+
+let data=[]
+
+try{
 
 const res=await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music&limit=30`)
+const itunes=await res.json()
 
-const data=await res.json()
+if(itunes.results && itunes.results.length>0){
 
-playlist=data.results.filter(t=>t.previewUrl)
+data=itunes.results
+
+}else{
+
+const dz=await fetch(`https://api.deezer.com/search?q=${encodeURIComponent(q)}`)
+const dzData=await dz.json()
+
+data=dzData.data.map(t=>({
+trackName:t.title,
+artistName:t.artist.name,
+artworkUrl100:t.album.cover_medium,
+previewUrl:t.preview
+}))
+
+}
+
+}catch(e){
+
+console.log(e)
+
+}
+
+playlist=data.filter(t=>t.previewUrl)
 
 resultsDiv.innerHTML=""
 
@@ -330,8 +104,9 @@ resultsDiv.appendChild(card)
 
 function playTrack(track){
 
-audio.src=track.previewUrl
+if(!track.previewUrl) return
 
+audio.src=track.previewUrl
 audio.currentTime=0
 
 audio.play()
@@ -390,7 +165,7 @@ timeEnd.innerText=format(audio.duration)
 
 audio.ontimeupdate=()=>{
 
-if(!audio.duration)return
+if(!audio.duration) return
 
 timeCur.innerText=format(audio.currentTime)
 
@@ -402,7 +177,7 @@ barFill.style.width=percent+"%"
 
 barBg.onclick=(e)=>{
 
-if(!audio.duration)return
+if(!audio.duration) return
 
 const rect=barBg.getBoundingClientRect()
 
@@ -427,9 +202,3 @@ search(searchInput.value)
 }
 
 })
-
-</script>
-
-</body>
-
-</html>
