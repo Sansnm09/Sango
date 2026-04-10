@@ -11,19 +11,34 @@
 
 <h1>Sango Music</h1>
 
-<div class="search-box">
-<input id="searchInput" placeholder="Search songs">
+<div class="search">
+<input id="searchInput" placeholder="Search song">
 <button onclick="searchSongs()">Search</button>
 </div>
 
+<div class="container">
+
+<div class="results">
 <h2>Results</h2>
 <div id="results"></div>
+</div>
 
-<h2>Now Playing</h2>
-<div id="player"></div>
+<div class="queue-panel">
 
 <h2>Queue</h2>
 <ul id="queue"></ul>
+
+<div class="controls">
+<button onclick="previousSong()">Previous</button>
+<button onclick="nextSong()">Next</button>
+</div>
+
+</div>
+
+</div>
+
+<h2>Now Playing</h2>
+<div id="player"></div>
 
 <script src="script.js"></script>
 
