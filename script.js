@@ -1,151 +1,132 @@
-const audio = document.getElementById("audio")
-const playBtn = document.getElementById("playBtn")
-const prevBtn = document.getElementById("prevBtn")
-const nextBtn = document.getElementById("nextBtn")
-const barFill = document.getElementById("barFill")
-const barBg = document.getElementById("barBg")
-const timeCur = document.getElementById("timeCur")
-const timeEnd = document.getElementById("timeEnd")
-const searchInput = document.getElementById("searchInput")
-const resultsDiv = document.getElementById("results")
-const cover = document.getElementById("cover")
-const titleEl = document.getElementById("title")
-const artistEl = document.getElementById("artist")
-const queueBtn = document.getElementById("queueBtn")
-const queuePanel = document.getElementById("queuePanel")
-const queueList = document.getElementById("queueList")
+const API_KEY = "YOUR_API_KEY"
 
-let playlist = []
-let queue = []
-let index = -1
+let queue=[]
+let currentIndex=0
 
-audio.volume = 0.7
+async function searchSongs(){
 
-function fmt(sec) {
-  if (!sec || isNaN(sec)) return "0:00"
-  const m = Math.floor(sec / 60)
-  const s = Math.floor(sec % 60)
-  return m + ":" + (s < 10 ? "0" + s : s)
+const query=document.getElementById("searchInput").value
+
+if(query===""){
+alert("Enter song name")
+return
 }
 
-async function search(q) {
-  if (!q.trim()) return
-  resultsDiv.innerHTML = '<div id="loading">Searching...</div>'
+const url=`https://spotify23.p.rapidapi.com/search/?q=${query}&type=tracks&limit=6`
 
-  try {
-    const proxy = "https://corsproxy.io/?"
-    const url = proxy + encodeURIComponent("https://api.deezer.com/search?q=" + encodeURIComponent(q) + "&limit=20")
-    const res = await fetch(url)
-    const data = await res.json()
-
-    if (!data.data || data.data.length === 0) {
-      resultsDiv.innerHTML = '<div id="loading">No results found.</div>'
-      return
-    }
-
-    playlist = data.data.filter(t => t.preview).map(t => ({
-      trackName: t.title,
-      artistName: t.artist.name,
-      artworkUrl: t.album.cover_medium,
-      previewUrl: t.preview
-    }))
-
-    renderResults()
-  } catch (e) {
-    resultsDiv.innerHTML = '<div id="loading">Search failed. Try again.</div>'
-    console.error(e)
-  }
+const options={
+method:'GET',
+headers:{
+'X-RapidAPI-Key':API_KEY,
+'X-RapidAPI-Host':'spotify23.p.rapidapi.com'
+}
 }
 
-function renderResults() {
-  resultsDiv.innerHTML = ""
-  playlist.forEach((t, i) => {
-    const row = document.createElement("div")
-    row.className = "song"
-    row.innerHTML = `
-      <img src="${t.artworkUrl}" alt="" />
-      <div class="song-info">
-        <div class="sname">${t.trackName}</div>
-        <div class="sartist">${t.artistName}</div>
-      </div>
-      <div class="song-btns">
-        <button class="play-btn">&#9654; Play</button>
-        <button class="add-btn">+</button>
-      </div>
-    `
-    row.querySelector(".play-btn").onclick = () => { index = i; playTrack(playlist[i]) }
-    row.querySelector(".add-btn").onclick = () => { queue.push(playlist[i]); renderQueue() }
-    resultsDiv.appendChild(row)
-  })
-}
+const response=await fetch(url,options)
+const data=await response.json()
 
-function playTrack(track) {
-  if (!track || !track.previewUrl) return
-  audio.pause()
-  audio.src = track.previewUrl
-  audio.load()
-  audio.play().catch(err => console.warn("Playback error:", err))
-  cover.src = track.artworkUrl
-  titleEl.textContent = track.trackName
-  artistEl.textContent = track.artistName
-  playBtn.innerHTML = "&#9646;&#9646;"
-}
+const tracks=data.tracks.items
 
-playBtn.onclick = () => {
-  if (!audio.src) return
-  if (audio.paused) {
-    audio.play()
-    playBtn.innerHTML = "&#9646;&#9646;"
-  } else {
-    audio.pause()
-    playBtn.innerHTML = "&#9654;"
-  }
-}
+let html=""
 
-prevBtn.onclick = () => {
-  if (index > 0) { index--; playTrack(playlist[index]) }
-}
+tracks.forEach(item=>{
 
-nextBtn.onclick = () => {
-  if (index < playlist.length - 1) { index++; playTrack(playlist[index]) }
-}
+const track=item.data
 
-audio.onended = () => {
-  if (index < playlist.length - 1) { index++; playTrack(playlist[index]) }
-  else playBtn.innerHTML = "&#9654;"
-}
+html+=`
+<div class="track">
 
-audio.onloadedmetadata = () => { timeEnd.textContent = fmt(audio.duration) }
+<img src="${track.albumOfTrack.coverArt.sources[0].url}">
 
-audio.ontimeupdate = () => {
-  if (!audio.duration) return
-  timeCur.textContent = fmt(audio.currentTime)
-  barFill.style.width = (audio.currentTime / audio.duration * 100) + "%"
-}
+<p>${track.name} - ${track.artists.items[0].profile.name}</p>
 
-barBg.onclick = e => {
-  if (!audio.duration) return
-  const rect = barBg.getBoundingClientRect()
-  audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration
-}
+<button onclick="playSong('${track.id}')">Play</button>
 
-document.getElementById("volSlider").oninput = e => { audio.volume = e.target.value }
+<button onclick="addQueue('${track.id}','${track.name}')">
+Add to Queue
+</button>
 
-function renderQueue() {
-  queueList.innerHTML = ""
-  queue.forEach(s => {
-    const li = document.createElement("li")
-    li.textContent = s.trackName + " — " + s.artistName
-    queueList.appendChild(li)
-  })
-}
-
-document.getElementById("clearQueue").onclick = () => { queue = []; renderQueue() }
-
-queueBtn.onclick = () => {
-  queuePanel.style.display = queuePanel.style.display === "block" ? "none" : "block"
-}
-
-searchInput.addEventListener("keypress", e => {
-  if (e.key === "Enter") search(searchInput.value)
+</div>
+`
 })
+
+document.getElementById("results").innerHTML=html
+}
+
+function playSong(id){
+
+document.getElementById("player").innerHTML=
+`<iframe src="https://open.spotify.com/embed/track/${id}" width="400" height="100"></iframe>`
+
+}
+
+function addQueue(id,name){
+
+queue.push({id,name})
+
+updateQueue()
+
+}
+
+function updateQueue(){
+
+let html=""
+
+queue.forEach((song,index)=>{
+
+html+=`<li>${song.name}</li>`
+
+})
+
+document.getElementById("queue").innerHTML=html
+
+}
+
+function playQueue(){
+
+if(queue.length===0){
+alert("Queue empty")
+return
+}
+
+currentIndex=0
+
+playSong(queue[currentIndex].id)
+
+}
+
+function nextSong(){
+
+if(queue.length===0) return
+
+currentIndex++
+
+if(currentIndex>=queue.length){
+currentIndex=0
+}
+
+playSong(queue[currentIndex].id)
+
+}
+
+function previousSong(){
+
+if(queue.length===0) return
+
+currentIndex--
+
+if(currentIndex<0){
+currentIndex=queue.length-1
+}
+
+playSong(queue[currentIndex].id)
+
+}
+
+function clearQueue(){
+
+queue=[]
+
+updateQueue()
+
+}
