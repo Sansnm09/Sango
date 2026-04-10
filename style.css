@@ -2,36 +2,46 @@ body{
 background:#121212;
 color:white;
 font-family:Arial;
-text-align:center;
 }
 
-.search-box{
+.search{
+text-align:center;
 margin:20px;
 }
 
-input{
-padding:10px;
-width:250px;
+.container{
+display:flex;
+justify-content:center;
+gap:50px;
 }
 
-button{
-padding:10px;
-background:#1db954;
-border:none;
-color:white;
-cursor:pointer;
-margin:5px;
+.results{
+width:400px;
+}
+
+.queue-panel{
+width:250px;
+background:#1e1e1e;
+padding:20px;
+border-radius:10px;
 }
 
 .track{
 background:#1e1e1e;
-margin:15px auto;
-padding:15px;
-width:350px;
-border-radius:10px;
+padding:10px;
+margin:10px;
+border-radius:8px;
 }
 
-img{
-width:100px;
-border-radius:5px;
+button{
+padding:8px;
+margin:5px;
+background:#1db954;
+border:none;
+color:white;
+cursor:pointer;
+}
+
+.controls{
+margin-top:20px;
 }
