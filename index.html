@@ -1,281 +1,71 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>SAZGO MUSIC</title>
-
-<style>
-
-body{
-margin:0;
-background:#050505;
-color:white;
-font-family:Arial;
-display:flex;
-flex-direction:column;
-height:100vh;
-}
-
-/* HEADER */
-
-header{
-padding:20px;
-display:flex;
-gap:20px;
-align-items:center;
-border-bottom:1px solid #222;
-}
-
-input{
-padding:10px;
-width:300px;
-border-radius:20px;
-border:none;
-background:#18181b;
-color:white;
-}
-
-/* RESULTS LIST */
-
-.main{
-flex:1;
-overflow:auto;
-padding:20px;
-}
-
-.results{
-max-width:700px;
-margin:auto;
-display:flex;
-flex-direction:column;
-gap:12px;
-}
-
-.song{
-display:flex;
-align-items:center;
-gap:15px;
-background:#111;
-padding:10px;
-border-radius:8px;
-cursor:pointer;
-}
-
-.song img{
-width:60px;
-height:60px;
-border-radius:6px;
-}
-
-.song .meta{
-flex:1;
-}
-
-.song .title{
-font-size:14px;
-font-weight:bold;
-}
-
-.song .artist{
-font-size:12px;
-color:#777;
-}
-
-/* PLAYER */
-
-footer{
-height:100px;
-background:#09090b;
-display:flex;
-align-items:center;
-justify-content:center;
-gap:20px;
-border-top:1px solid #222;
-}
-
-button{
-padding:8px 12px;
-background:#1db954;
-border:none;
-color:white;
-cursor:pointer;
-border-radius:5px;
-}
-
-/* HIDDEN PLAYER */
-
-#ytPlayer{
-position:absolute;
-left:-9999px;
-}
-
-</style>
-
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Sango Music</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
-
 <body>
 
 <header>
-
-<h2>SAZGO</h2>
-
-<input id="searchInput" placeholder="Search songs">
-
-<button onclick="searchSongs()">Search</button>
-
+  <div class="logo">🎵 Sango</div>
+  <div class="searchbar">
+    <input id="searchInput" type="text" placeholder="Search any song, artist..."/>
+    <button id="searchBtn">Search</button>
+  </div>
 </header>
 
-<div class="main">
+<div class="layout">
 
-<div class="results" id="results"></div>
+  <main>
+    <div id="status" class="status">Search for a song above to start listening</div>
+    <div id="results"></div>
+  </main>
+
+  <aside id="sidebar">
+    <div class="sidebar-head">
+      <span>Queue</span>
+      <button id="clearBtn">Clear</button>
+    </div>
+    <ul id="queueList">
+      <li class="q-empty">Queue is empty</li>
+    </ul>
+  </aside>
 
 </div>
 
-<footer>
+<div id="queueFab">🎵</div>
 
-<button onclick="prevSong()">⏮</button>
+<footer id="player">
+  <div class="pl-left">
+    <img id="pImg" src="" alt=""/>
+    <div class="pl-meta">
+      <div id="pTitle">No song playing</div>
+      <div id="pArtist"></div>
+    </div>
+  </div>
 
-<button onclick="togglePlay()">▶ / ⏸</button>
+  <div class="pl-center">
+    <div class="pl-btns">
+      <button id="prevBtn">⏮</button>
+      <button id="playBtn" class="playmain">▶</button>
+      <button id="nextBtn">⏭</button>
+    </div>
+    <div class="pl-progress">
+      <span id="curTime">0:00</span>
+      <div id="bar"><div id="barFill"></div></div>
+      <span id="endTime">0:00</span>
+    </div>
+  </div>
 
-<button onclick="nextSong()">⏭</button>
-
-<span id="now">No song</span>
-
+  <div class="pl-right">
+    <span class="vol-label">🔊</span>
+    <input type="range" id="vol" min="0" max="1" step="0.02" value="0.85"/>
+  </div>
 </footer>
 
-<!-- Hidden YouTube Player -->
-<div id="ytPlayer"></div>
-
-<script>
-
-let player
-let playlist=[]
-let currentIndex=-1
-let isPlaying=false
-
-// Load YouTube API
-const tag=document.createElement('script')
-tag.src="https://www.youtube.com/iframe_api"
-document.body.appendChild(tag)
-
-function onYouTubeIframeAPIReady(){
-
-player=new YT.Player('ytPlayer',{
-height:'1',
-width:'1',
-events:{
-'onReady':()=>{},
-'onStateChange':onPlayerStateChange
-}
-})
-
-}
-
-// When video ends → auto next
-function onPlayerStateChange(e){
-
-if(e.data===0){ // ended
-nextSong()
-}
-
-}
-
-// SEARCH (GitHub API)
-async function searchSongs(){
-
-const q=document.getElementById("searchInput").value
-
-if(!q) return
-
-const res=await fetch(`https://ytsearcher.vercel.app/api/search?q=${encodeURIComponent(q)}`)
-const data=await res.json()
-
-playlist=data.videos
-
-let html=""
-
-playlist.slice(0,10).forEach((v,i)=>{
-
-html+=`
-<div class="song" onclick="playSong(${i})">
-
-<img src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg">
-
-<div class="meta">
-
-<div class="title">${v.title}</div>
-<div class="artist">YouTube</div>
-
-</div>
-
-</div>
-`
-
-})
-
-document.getElementById("results").innerHTML=html
-
-}
-
-// PLAY SONG
-function playSong(i){
-
-currentIndex=i
-
-player.loadVideoById(playlist[i].id)
-
-document.getElementById("now").innerText=playlist[i].title
-
-isPlaying=true
-
-}
-
-// PLAY / PAUSE
-function togglePlay(){
-
-if(!player) return
-
-if(isPlaying){
-
-player.pauseVideo()
-isPlaying=false
-
-}else{
-
-player.playVideo()
-isPlaying=true
-
-}
-
-}
-
-// NEXT
-function nextSong(){
-
-if(playlist.length===0) return
-
-currentIndex++
-
-if(currentIndex>=playlist.length) currentIndex=0
-
-playSong(currentIndex)
-
-}
-
-// PREVIOUS
-function prevSong(){
-
-if(playlist.length===0) return
-
-currentIndex--
-
-if(currentIndex<0) currentIndex=playlist.length-1
-
-playSong(currentIndex)
-
-}
-
-</script>
-
+<audio id="audio"></audio>
+<script src="script.js"></script>
 </body>
 </html>
