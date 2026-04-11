@@ -1,132 +1,259 @@
-const API_KEY = "YOUR_API_KEY"
+// ── Elements ──────────────────────────────────────────────────────────
+const searchInput = document.getElementById('searchInput')
+const searchBtn   = document.getElementById('searchBtn')
+const resultsDiv  = document.getElementById('results')
+const statusDiv   = document.getElementById('status')
+const queueListEl = document.getElementById('queueList')
+const clearBtn    = document.getElementById('clearBtn')
+const queueFab    = document.getElementById('queueFab')
+const sidebar     = document.getElementById('sidebar')
 
-let queue=[]
-let currentIndex=0
+const audio    = document.getElementById('audio')
+const playBtn  = document.getElementById('playBtn')
+const prevBtn  = document.getElementById('prevBtn')
+const nextBtn  = document.getElementById('nextBtn')
+const bar      = document.getElementById('bar')
+const barFill  = document.getElementById('barFill')
+const curTime  = document.getElementById('curTime')
+const endTime  = document.getElementById('endTime')
+const volSlider= document.getElementById('vol')
+const pImg     = document.getElementById('pImg')
+const pTitle   = document.getElementById('pTitle')
+const pArtist  = document.getElementById('pArtist')
 
-async function searchSongs(){
+// ── State ─────────────────────────────────────────────────────────────
+let results    = []
+let queue      = []
+let queueIdx   = -1
+let playingFromQueue = false
 
-const query=document.getElementById("searchInput").value
+audio.volume = 0.85
 
-if(query===""){
-alert("Enter song name")
-return
+// ── Helpers ───────────────────────────────────────────────────────────
+function fmt(sec) {
+  if (!sec || isNaN(sec)) return '0:00'
+  const m = Math.floor(sec / 60)
+  const s = Math.floor(sec % 60)
+  return m + ':' + (s < 10 ? '0' + s : s)
 }
 
-const url=`https://spotify23.p.rapidapi.com/search/?q=${query}&type=tracks&limit=6`
+function fmtSec(s) { return fmt(parseInt(s)) }
 
-const options={
-method:'GET',
-headers:{
-'X-RapidAPI-Key':API_KEY,
-'X-RapidAPI-Host':'spotify23.p.rapidapi.com'
+// pick best quality download url from saavn response
+function getBestUrl(downloadUrls) {
+  if (!downloadUrls || downloadUrls.length === 0) return null
+  // prefer 320kbps > 160kbps > 96kbps
+  const q = ['320kbps','160kbps','96kbps','48kbps']
+  for (const quality of q) {
+    const found = downloadUrls.find(u => u.quality === quality)
+    if (found && found.url) return found.url
+  }
+  return downloadUrls[0]?.url || null
 }
+
+// ── Search using saavn.dev API (GitHub: sumitkolhe/jiosaavn-api) ──────
+async function doSearch(query) {
+  if (!query.trim()) return
+
+  statusDiv.style.display = 'block'
+  statusDiv.textContent   = 'Searching...'
+  resultsDiv.innerHTML    = ''
+
+  try {
+    const url  = `https://saavn.dev/api/search/songs?query=${encodeURIComponent(query)}&page=1&limit=15`
+    const resp = await fetch(url)
+    const json = await resp.json()
+
+    if (!json.success || !json.data?.results?.length) {
+      statusDiv.textContent = 'No results found. Try another search.'
+      return
+    }
+
+    results = json.data.results.filter(t => getBestUrl(t.downloadUrl))
+
+    if (results.length === 0) {
+      statusDiv.textContent = 'No playable songs found. Try another search.'
+      return
+    }
+
+    statusDiv.style.display = 'none'
+    renderResults()
+
+  } catch (err) {
+    statusDiv.textContent = 'Search failed. Check your internet and try again.'
+    console.error(err)
+  }
 }
 
-const response=await fetch(url,options)
-const data=await response.json()
+// ── Render results list ───────────────────────────────────────────────
+function renderResults() {
+  resultsDiv.innerHTML = ''
 
-const tracks=data.tracks.items
+  results.forEach((song, i) => {
+    const img     = song.image?.[1]?.url || song.image?.[0]?.url || ''
+    const artist  = song.artists?.primary?.map(a => a.name).join(', ') || 'Unknown Artist'
+    const dur     = fmt(song.duration)
 
-let html=""
+    const row = document.createElement('div')
+    row.className = 'srow'
+    row.id = 'srow_' + i
 
-tracks.forEach(item=>{
+    row.innerHTML = `
+      <img src="${img}" alt="" loading="lazy"/>
+      <div class="sinfo">
+        <div class="sname">${song.name}</div>
+        <div class="sartist">${artist}</div>
+      </div>
+      <span class="sdur">${dur}</span>
+      <div class="sbtns">
+        <button class="btn-p">▶ Play</button>
+        <button class="btn-q">+ Queue</button>
+      </div>
+    `
 
-const track=item.data
+    row.querySelector('.btn-p').onclick = () => {
+      playingFromQueue = false
+      playResult(i)
+    }
 
-html+=`
-<div class="track">
+    row.querySelector('.btn-q').onclick = () => {
+      addToQueue(song)
+    }
 
-<img src="${track.albumOfTrack.coverArt.sources[0].url}">
+    resultsDiv.appendChild(row)
+  })
+}
 
-<p>${track.name} - ${track.artists.items[0].profile.name}</p>
+// ── Play from results list ────────────────────────────────────────────
+function playResult(i) {
+  document.querySelectorAll('.srow').forEach(r => r.classList.remove('playing'))
+  const row = document.getElementById('srow_' + i)
+  if (row) row.classList.add('playing')
+  loadPlay(results[i])
+}
 
-<button onclick="playSong('${track.id}')">Play</button>
+// ── Core play function ────────────────────────────────────────────────
+function loadPlay(song) {
+  const streamUrl = getBestUrl(song.downloadUrl)
+  if (!streamUrl) { alert('This song has no playable audio.'); return }
 
-<button onclick="addQueue('${track.id}','${track.name}')">
-Add to Queue
-</button>
+  const img    = song.image?.[1]?.url || song.image?.[0]?.url || ''
+  const artist = song.artists?.primary?.map(a => a.name).join(', ') || 'Unknown Artist'
 
-</div>
-`
+  audio.pause()
+  audio.src = streamUrl
+  audio.load()
+  audio.play().catch(e => console.warn('Play error:', e))
+
+  pImg.src    = img
+  pTitle.textContent  = song.name
+  pArtist.textContent = artist
+  playBtn.textContent = '⏸'
+}
+
+// ── Player controls ───────────────────────────────────────────────────
+playBtn.onclick = () => {
+  if (!audio.src) return
+  if (audio.paused) { audio.play(); playBtn.textContent = '⏸' }
+  else              { audio.pause(); playBtn.textContent = '▶' }
+}
+
+prevBtn.onclick = () => {
+  if (playingFromQueue && queueIdx > 0) {
+    queueIdx--
+    playQueue(queueIdx)
+  }
+}
+
+nextBtn.onclick = () => {
+  if (playingFromQueue && queueIdx < queue.length - 1) {
+    queueIdx++
+    playQueue(queueIdx)
+  }
+}
+
+// auto play next from queue when song ends
+audio.onended = () => {
+  if (playingFromQueue && queueIdx < queue.length - 1) {
+    queueIdx++
+    playQueue(queueIdx)
+  } else {
+    playBtn.textContent = '▶'
+  }
+}
+
+audio.onplay  = () => { playBtn.textContent = '⏸' }
+audio.onpause = () => { playBtn.textContent = '▶' }
+
+audio.onloadedmetadata = () => { endTime.textContent = fmt(audio.duration) }
+
+audio.ontimeupdate = () => {
+  if (!audio.duration) return
+  curTime.textContent      = fmt(audio.currentTime)
+  barFill.style.width      = (audio.currentTime / audio.duration * 100) + '%'
+}
+
+bar.onclick = e => {
+  if (!audio.duration) return
+  const r = bar.getBoundingClientRect()
+  audio.currentTime = ((e.clientX - r.left) / r.width) * audio.duration
+}
+
+volSlider.oninput = e => { audio.volume = e.target.value }
+
+// ── Queue ─────────────────────────────────────────────────────────────
+function addToQueue(song) {
+  queue.push(song)
+  renderQueue()
+}
+
+function playQueue(idx) {
+  queueIdx = idx
+  playingFromQueue = true
+  document.querySelectorAll('.srow').forEach(r => r.classList.remove('playing'))
+  loadPlay(queue[idx])
+  renderQueue()
+}
+
+function renderQueue() {
+  queueListEl.innerHTML = ''
+
+  if (queue.length === 0) {
+    const li = document.createElement('li')
+    li.className = 'q-empty'
+    li.textContent = 'Queue is empty'
+    queueListEl.appendChild(li)
+    return
+  }
+
+  queue.forEach((song, i) => {
+    const img    = song.image?.[0]?.url || ''
+    const artist = song.artists?.primary?.map(a => a.name).join(', ') || ''
+    const li     = document.createElement('li')
+    if (playingFromQueue && i === queueIdx) li.classList.add('q-active')
+
+    li.innerHTML = `
+      <img src="${img}" alt="" loading="lazy"/>
+      <div class="qi">
+        <div class="qn">${song.name}</div>
+        <div class="qa">${artist}</div>
+      </div>
+    `
+    li.onclick = () => playQueue(i)
+    queueListEl.appendChild(li)
+  })
+}
+
+clearBtn.onclick = () => {
+  queue = []; queueIdx = -1; playingFromQueue = false
+  renderQueue()
+}
+
+// ── Mobile toggle ─────────────────────────────────────────────────────
+queueFab.onclick = () => sidebar.classList.toggle('open')
+
+// ── Search triggers ───────────────────────────────────────────────────
+searchBtn.onclick = () => doSearch(searchInput.value)
+searchInput.addEventListener('keypress', e => {
+  if (e.key === 'Enter') doSearch(searchInput.value)
 })
-
-document.getElementById("results").innerHTML=html
-}
-
-function playSong(id){
-
-document.getElementById("player").innerHTML=
-`<iframe src="https://open.spotify.com/embed/track/${id}" width="400" height="100"></iframe>`
-
-}
-
-function addQueue(id,name){
-
-queue.push({id,name})
-
-updateQueue()
-
-}
-
-function updateQueue(){
-
-let html=""
-
-queue.forEach((song,index)=>{
-
-html+=`<li>${song.name}</li>`
-
-})
-
-document.getElementById("queue").innerHTML=html
-
-}
-
-function playQueue(){
-
-if(queue.length===0){
-alert("Queue empty")
-return
-}
-
-currentIndex=0
-
-playSong(queue[currentIndex].id)
-
-}
-
-function nextSong(){
-
-if(queue.length===0) return
-
-currentIndex++
-
-if(currentIndex>=queue.length){
-currentIndex=0
-}
-
-playSong(queue[currentIndex].id)
-
-}
-
-function previousSong(){
-
-if(queue.length===0) return
-
-currentIndex--
-
-if(currentIndex<0){
-currentIndex=queue.length-1
-}
-
-playSong(queue[currentIndex].id)
-
-}
-
-function clearQueue(){
-
-queue=[]
-
-updateQueue()
-
-}
