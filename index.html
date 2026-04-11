@@ -1,479 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-<meta charset="UTF-8">
-<title>SAZGO MUSIC</title>
-
-<style>
-
-:root{
---bg:#050505;
---accent:#3498db;
---card:#111;
---text:#fff;
---dim:#777;
-}
-
-body{
-margin:0;
-background:var(--bg);
-color:var(--text);
-font-family:Segoe UI, Arial;
-height:100vh;
-display:flex;
-flex-direction:column;
-overflow:hidden;
-}
-
-/* HEADER */
-
-header{
-height:70px;
-display:flex;
-align-items:center;
-padding:0 40px;
-gap:40px;
-border-bottom:1px solid #1e1e1e;
-}
-
-.brand{
-font-weight:800;
-letter-spacing:3px;
-color:var(--accent);
-}
-
-.search-wrap{
-flex:1;
-max-width:500px;
-}
-
-.search-wrap input{
-width:100%;
-background:#18181b;
-border:1px solid #27272a;
-padding:12px 20px;
-border-radius:30px;
-color:white;
-outline:none;
-}
-
-/* MAIN */
-
-.main{
-flex:1;
-overflow-y:auto;
-padding:40px;
-display:flex;
-flex-direction:column;
-}
-
-#empty-state{
-margin:auto;
-color:#111;
-font-size:60px;
-font-weight:900;
-letter-spacing:15px;
-}
-
-/* LIST RESULTS */
-
-.results{
-display:flex;
-flex-direction:column;
-gap:12px;
-max-width:650px;
-margin:auto;
-}
-
-.card{
-display:flex;
-align-items:center;
-gap:15px;
-background:var(--card);
-padding:10px;
-border-radius:8px;
-cursor:pointer;
-transition:.2s;
-}
-
-.card:hover{
-background:#18181b;
-}
-
-.card img{
-width:60px;
-height:60px;
-border-radius:6px;
-}
-
-.card .title{
-font-size:14px;
-font-weight:700;
-}
-
-.card .artist{
-font-size:12px;
-color:var(--dim);
-}
-
-/* FOOTER PLAYER */
-
-footer{
-height:110px;
-background:#09090b;
-border-top:1px solid #1e1e1e;
-display:flex;
-align-items:center;
-padding:0 40px;
-gap:40px;
-}
-
-.track-info{
-display:flex;
-align-items:center;
-gap:15px;
-width:280px;
-}
-
-.track-info img{
-width:55px;
-height:55px;
-border-radius:6px;
-object-fit:cover;
-}
-
-.controls-box{
-flex:1;
-display:flex;
-flex-direction:column;
-align-items:center;
-gap:10px;
-}
-
-.btn-row{
-display:flex;
-align-items:center;
-gap:25px;
-}
-
-.play-btn{
-width:45px;
-height:45px;
-background:white;
-border-radius:50%;
-display:flex;
-align-items:center;
-justify-content:center;
-color:black;
-border:none;
-cursor:pointer;
-font-size:20px;
-}
-
-.progress-row{
-width:100%;
-max-width:600px;
-display:flex;
-align-items:center;
-gap:12px;
-}
-
-.time{
-font-size:11px;
-color:var(--dim);
-min-width:35px;
-font-family:monospace;
-}
-
-.bar-bg{
-flex:1;
-height:4px;
-background:#27272a;
-border-radius:2px;
-cursor:pointer;
-position:relative;
-}
-
-.bar-fill{
-height:100%;
-background:var(--accent);
-width:0%;
-}
-
-.vol-row{
-width:150px;
-display:flex;
-align-items:center;
-gap:10px;
-}
-
-</style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Sango Music</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
-
 <body>
 
 <header>
-
-<div class="brand">SAZGO</div>
-
-<div class="search-wrap">
-<input type="text" id="searchInput" placeholder="Search songs, artists or albums">
-</div>
-
+  <div class="logo">🎵 Sango</div>
+  <div class="searchbar">
+    <input id="searchInput" type="text" placeholder="Search any song, artist..."/>
+    <button id="searchBtn">Search</button>
+  </div>
 </header>
 
-<main class="main">
+<div class="layout">
 
-<div id="empty-state">SAZGO</div>
+  <main>
+    <div id="status" class="status">Search for a song above to start listening</div>
+    <div id="results"></div>
+  </main>
 
-<div class="results" id="results"></div>
-
-</main>
-
-<footer>
-
-<div class="track-info">
-
-<img id="pArt">
-
-<div>
-
-<h4 id="pTitle">No Song</h4>
-
-<p id="pArtist" style="font-size:12px;color:var(--accent)">Select music</p>
+  <aside id="sidebar">
+    <div class="sidebar-head">
+      <span>Queue</span>
+      <button id="clearBtn">Clear</button>
+    </div>
+    <ul id="queueList">
+      <li class="q-empty">Queue is empty</li>
+    </ul>
+  </aside>
 
 </div>
 
-</div>
+<div id="queueFab">🎵</div>
 
-<div class="controls-box">
+<footer id="player">
+  <div class="pl-left">
+    <img id="pImg" src="" alt=""/>
+    <div class="pl-meta">
+      <div id="pTitle">No song playing</div>
+      <div id="pArtist"></div>
+    </div>
+  </div>
 
-<div class="btn-row">
+  <div class="pl-center">
+    <div class="pl-btns">
+      <button id="prevBtn">⏮</button>
+      <button id="playBtn" class="playmain">▶</button>
+      <button id="nextBtn">⏭</button>
+    </div>
+    <div class="pl-progress">
+      <span id="curTime">0:00</span>
+      <div id="bar"><div id="barFill"></div></div>
+      <span id="endTime">0:00</span>
+    </div>
+  </div>
 
-<span id="prevBtn">⏮</span>
-
-<button class="play-btn" id="playBtn">▶</button>
-
-<span id="nextBtn">⏭</span>
-
-</div>
-
-<div class="progress-row">
-
-<span class="time" id="timeCur">0:00</span>
-
-<div class="bar-bg" id="barBg">
-
-<div class="bar-fill" id="barFill"></div>
-
-</div>
-
-<span class="time" id="timeEnd">0:00</span>
-
-</div>
-
-</div>
-
-<div class="vol-row">
-
-<span>🔊</span>
-
-<input type="range" id="volSlider" min="0" max="1" step="0.05" value="0.7">
-
-</div>
-
+  <div class="pl-right">
+    <span class="vol-label">🔊</span>
+    <input type="range" id="vol" min="0" max="1" step="0.02" value="0.85"/>
+  </div>
 </footer>
 
-<audio id="audioEngine"></audio>
-
-<script>
-
-const audio=document.getElementById("audioEngine")
-const playBtn=document.getElementById("playBtn")
-const prevBtn=document.getElementById("prevBtn")
-const nextBtn=document.getElementById("nextBtn")
-
-const barFill=document.getElementById("barFill")
-const barBg=document.getElementById("barBg")
-
-const timeCur=document.getElementById("timeCur")
-const timeEnd=document.getElementById("timeEnd")
-
-const searchInput=document.getElementById("searchInput")
-const resultsDiv=document.getElementById("results")
-
-const pArt=document.getElementById("pArt")
-const pTitle=document.getElementById("pTitle")
-const pArtist=document.getElementById("pArtist")
-
-let playlist=[]
-let currentIndex=-1
-
-audio.volume=0.7
-audio.preload="auto"
-
-function formatTime(secs){
-
-if(isNaN(secs)) return "0:00"
-
-const m=Math.floor(secs/60)
-const s=Math.floor(secs%60)
-
-return m+":"+(s<10?"0":"")+s
-
-}
-
-async function performSearch(q){
-
-if(!q) return
-
-document.getElementById("empty-state").style.display="none"
-
-resultsDiv.innerHTML="Searching..."
-
-const res=await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=25`)
-
-const data=await res.json()
-
-playlist=data.results
-
-resultsDiv.innerHTML=""
-
-playlist.forEach((track,index)=>{
-
-if(!track.previewUrl) return
-
-const card=document.createElement("div")
-
-card.className="card"
-
-card.onclick=()=>{
-
-currentIndex=index
-
-playTrack(track)
-
-}
-
-card.innerHTML=`
-
-<img src="${track.artworkUrl100}">
-
-<div>
-
-<div class="title">${track.trackName}</div>
-
-<div class="artist">${track.artistName}</div>
-
-</div>
-
-`
-
-resultsDiv.appendChild(card)
-
-})
-
-}
-
-function playTrack(track){
-
-audio.src=track.previewUrl
-audio.load()
-
-audio.play()
-
-pArt.src=track.artworkUrl100
-pTitle.innerText=track.trackName
-pArtist.innerText=track.artistName
-
-playBtn.innerText="⏸"
-
-}
-
-playBtn.onclick=()=>{
-
-if(audio.paused){
-
-audio.play()
-playBtn.innerText="⏸"
-
-}else{
-
-audio.pause()
-playBtn.innerText="▶"
-
-}
-
-}
-
-prevBtn.onclick=()=>{
-
-if(currentIndex<=0) return
-
-currentIndex--
-
-playTrack(playlist[currentIndex])
-
-}
-
-nextBtn.onclick=()=>{
-
-if(currentIndex>=playlist.length-1) return
-
-currentIndex++
-
-playTrack(playlist[currentIndex])
-
-}
-
-audio.onloadedmetadata=()=>{
-
-timeEnd.innerText=formatTime(audio.duration)
-
-}
-
-audio.ontimeupdate=()=>{
-
-if(!audio.duration) return
-
-timeCur.innerText=formatTime(audio.currentTime)
-
-const percent=(audio.currentTime/audio.duration)*100
-
-barFill.style.width=percent+"%"
-
-}
-
-barBg.onclick=(e)=>{
-
-if(!audio.duration) return
-
-const rect=barBg.getBoundingClientRect()
-
-const pos=(e.clientX-rect.left)/rect.width
-
-audio.currentTime=pos*audio.duration
-
-}
-
-document.getElementById("volSlider").oninput=e=>{
-
-audio.volume=e.target.value
-
-}
-
-searchInput.addEventListener("keypress",e=>{
-
-if(e.key==="Enter"){
-
-performSearch(searchInput.value)
-
-}
-
-})
-
-</script>
-
+<audio id="audio"></audio>
+<script src="script.js"></script>
 </body>
 </html>
