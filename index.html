@@ -1,71 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Sango Music</title>
-  <link rel="stylesheet" href="style.css"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arena X — Institute Games</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header>
-  <div class="logo">🎵 Sango</div>
-  <div class="searchbar">
-    <input id="searchInput" type="text" placeholder="Search any song, artist..."/>
-    <button id="searchBtn">Search</button>
+<div class="bg-glow"></div>
+
+<header class="site-header">
+  <div class="brand">
+    <span class="brand-name">ARENA X</span>
+    <span class="brand-tag">Why Not You?</span>
   </div>
+  <nav>
+    <a href="#events" class="nav-link">Events</a>
+    <a href="#about" class="nav-link">About</a>
+    <button class="btn primary">Sign In</button>
+  </nav>
 </header>
 
-<div class="layout">
+<section class="hero">
+  <div class="hero-inner">
+    <p class="eyebrow"><span class="dot"></span> Live standings</p>
+    <h1 class="hero-title">Two Houses. <span class="accent-a">One</span> Arena.</h1>
 
-  <main>
-    <div id="status" class="status">Search for a song above to start listening</div>
-    <div id="results"></div>
-  </main>
-
-  <aside id="sidebar">
-    <div class="sidebar-head">
-      <span>Queue</span>
-      <button id="clearBtn">Clear</button>
+    <div class="scoreboard" id="scoreboard">
+      <div class="house house-a">
+        <span class="house-label">Arjuna</span>
+        <span class="house-score" data-target="0">0</span>
+      </div>
+      <div class="vs">VS</div>
+      <div class="house house-b">
+        <span class="house-label">Bharatha</span>
+        <span class="house-score" data-target="0">0</span>
+      </div>
     </div>
-    <ul id="queueList">
-      <li class="q-empty">Queue is empty</li>
-    </ul>
-  </aside>
 
-</div>
+    <div class="tug-bar">
+      <div class="tug-fill-a" style="width:50%"></div>
+      <div class="tug-fill-b" style="width:50%"></div>
+      <div class="tug-marker"></div>
+    </div>
 
-<div id="queueFab">🎵</div>
+    <p class="hero-note">Scores update live as coordinators confirm results.</p>
+  </div>
+</section>
 
-<footer id="player">
-  <div class="pl-left">
-    <img id="pImg" src="" alt=""/>
-    <div class="pl-meta">
-      <div id="pTitle">No song playing</div>
-      <div id="pArtist"></div>
+<section class="categories" id="events">
+  <h2 class="section-title">Compete Across</h2>
+  <div class="cat-grid">
+    <div class="cat-card reveal">
+      <span class="cat-icon">◆</span>
+      <h3>UG Team Games</h3>
+      <p>Undergraduate house battles across the field.</p>
+    </div>
+    <div class="cat-card reveal">
+      <span class="cat-icon">◆</span>
+      <h3>PG Team Games</h3>
+      <p>Postgraduate teams, fewer games, same fire.</p>
+    </div>
+    <div class="cat-card reveal">
+      <span class="cat-icon">●</span>
+      <h3>Individual</h3>
+      <p>Every point earned on your own.</p>
+    </div>
+    <div class="cat-card reveal">
+      <span class="cat-icon">●●</span>
+      <h3>Doubles</h3>
+      <p>Badminton and table tennis, pairs only.</p>
+    </div>
+    <div class="cat-card reveal">
+      <span class="cat-icon">✦</span>
+      <h3>Cultural</h3>
+      <p>Song, dance, and stage — house pride beyond the field.</p>
     </div>
   </div>
+</section>
 
-  <div class="pl-center">
-    <div class="pl-btns">
-      <button id="prevBtn">⏮</button>
-      <button id="playBtn" class="playmain">▶</button>
-      <button id="nextBtn">⏭</button>
-    </div>
-    <div class="pl-progress">
-      <span id="curTime">0:00</span>
-      <div id="bar"><div id="barFill"></div></div>
-      <span id="endTime">0:00</span>
-    </div>
+<section class="about" id="about">
+  <h2 class="section-title">How it Works</h2>
+  <div class="steps-row">
+    <div class="step reveal"><span class="step-num">01</span><p>Admin registers every student and opens events for the season.</p></div>
+    <div class="step reveal"><span class="step-num">02</span><p>Students log in with their registration number and apply for events, within set limits.</p></div>
+    <div class="step reveal"><span class="step-num">03</span><p>Coordinators confirm results as events happen — the board updates live for everyone.</p></div>
   </div>
+</section>
 
-  <div class="pl-right">
-    <span class="vol-label">🔊</span>
-    <input type="range" id="vol" min="0" max="1" step="0.02" value="0.85"/>
-  </div>
+<footer class="site-footer">
+  <p>Arena X — built for the institute's athletics &amp; cultural season.</p>
 </footer>
 
-<audio id="audio"></audio>
 <script src="script.js"></script>
 </body>
 </html>
